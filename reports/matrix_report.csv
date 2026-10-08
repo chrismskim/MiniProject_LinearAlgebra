@@ -1,0 +1,11 @@
+Metric,Value
+Customers,5475.0
+Products,3689.0
+Total Entries,20197275.0
+Non-zero Entries,413983.0
+Sparsity (%),97.95
+Density (%),2.05
+Dense Memory (MiB),154.09
+Sparse Memory (MiB),4.76
+Memory Reduction (%),96.91
+Compression Ratio,32.38

@@ -304,3 +304,34 @@ Random seeds will be fixed when stochastic modeling methods are introduced.
 - **ML1–ML7:** Perform dimensionality reduction, recommendation modeling, evaluation, and customer segmentation.
 - **J2:** Prepare the stakeholder memo.
 - **J3:** Prepare the final presentation.
+## DE5: Matrix Statistics and Memory Report
+
+The customer-product matrix was analyzed to measure sparsity and compare dense versus sparse storage requirements.
+
+### Results
+
+| Metric | Value |
+|---|---:|
+| Matrix Shape | 5,475 × 3,689 |
+| Total Entries | 20,197,275 |
+| Non-zero Entries | 413,983 |
+| Sparsity | 97.95% |
+| Density | 2.05% |
+| Dense Memory | 154.09 MiB |
+| Sparse Memory (CSR) | 4.76 MiB |
+| Memory Reduction | 96.91% |
+| Compression Ratio | 32.38× |
+
+### Findings
+
+- Approximately 97.95% of matrix entries are zero.
+- CSR storage reduces memory usage from 154.09 MiB to 4.76 MiB.
+- Sparse storage requires approximately 32.38 times less memory than dense storage.
+- These measurements compare storage formats before PCA or SVD dimensionality reduction.
+
+### Implementation
+
+- **Script:** `matrix_report.py`
+- **Output:** `reports/matrix_report.csv`
+
+All implemented matrix validation checks passed.
