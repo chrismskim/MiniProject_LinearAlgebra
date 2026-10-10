@@ -509,3 +509,23 @@ After generating the recommendation files, run:
 `python evaluate.py`
 
 All ML4 evaluation validation checks passed.
+
+
+## ML5: Model Comparison and Selection
+
+Truncated SVD models were compared using recommendation accuracy, explained variance, and dimensionality.
+
+### Model Comparison Results
+
+| Model | Precision@10 | Explained Variance | Precision Improvement over Baseline |
+|---|---:|---:|---:|
+| SVD k=10 | 4.70% | 19.83% | +108.10% |
+| SVD k=20 | 5.50% | 25.25% | +143.75% |
+| SVD k=50 | **6.13%** | 34.88% | **+171.30%** |
+| SVD k=100 | 6.00% | 44.72% | +165.51% |
+
+### Selected Model: Truncated SVD (k=50)
+
+SVD with 50 components achieved the highest Precision@10 among the evaluated models.
+
+Compared
