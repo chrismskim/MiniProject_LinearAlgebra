@@ -335,3 +335,27 @@ The customer-product matrix was analyzed to measure sparsity and compare dense v
 - **Output:** `reports/matrix_report.csv`
 
 All implemented matrix validation checks passed.
+
+
+## DE6: Reproducible Data Pipeline
+
+The complete data engineering pipeline was automated to rebuild the customer-product matrix directly from the raw dataset using a single command.
+
+### Execution
+
+Run the following command from the project root directory:
+
+```bash
+python build_matrix.py
+```
+
+### Pipeline Steps
+
+1. **Data Cleaning (DE2):** Loads the raw Excel dataset, removes invalid transactions, validates the results, and saves the cleaned data.
+2. **Train/Test Split (DE3):** Splits the cleaned dataset chronologically, identifies held-out purchases, and saves the training and test datasets.
+3. **Sparse Matrix Construction (DE4):** Builds the sparse customer-product matrix using training data only and saves the index mappings.
+
+### Execution Results
+
+| Metric | Value |
+|
