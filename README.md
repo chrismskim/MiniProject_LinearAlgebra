@@ -464,3 +464,48 @@ The Top-10 most popular products not previously purchased by each customer are r
 - **Outputs:** `data/processed/recommendations/`
 
 ###
+
+## ML4: Recommendation Evaluation
+
+The recommendation models were evaluated using held-out customer-product purchases from the final two months of the dataset.
+
+### Evaluation Setup
+
+- **Held-out Test Rows:** 56,919
+- **Eligible Evaluation Customers:** 1,913
+- **Unique Evaluable Customer-Product Pairs:** 44,729
+- **Recommendation Length:** Top-10
+- **Metrics:** Precision@10, Recall@10, Hit Rate@10
+- **Evaluation Protocol:** Previously purchased products and unavailable training products are excluded.
+
+### Results
+
+| Model | Precision@10 | Recall@10 | Hit Rate@10 |
+|---|---:|---:|---:|
+| Popularity Baseline | 2.26% | 1.15% | 17.41% |
+| SVD k=10 | 4.70% | 2.89% | 30.89% |
+| SVD k=20 | 5.50% | 3.71% | 35.02% |
+| SVD k=50 | **6.13%** | 4.32% | 37.32% |
+| SVD k=100 | 6.00% | **4.38%** | **38.06%** |
+
+### Findings
+
+- All SVD models outperformed the popularity-based baseline across the three evaluation metrics.
+- SVD with k=50 achieved the highest Precision@10 (6.13%).
+- SVD with k=100 achieved the highest Recall@10 (4.38%) and Hit Rate@10 (38.06%).
+- Increasing k beyond 50 did not improve Precision@10 in this experiment.
+- k=50 is a reasonable candidate if Precision@10 is prioritized, although final model selection depends on the project's evaluation priorities.
+
+### Implementation
+
+- **Evaluation Script:** `evaluate.py`
+- **Results:** `reports/evaluation_results.csv`
+- **Ground Truth:** `data/processed/test.pkl`
+
+### Reproduction
+
+After generating the recommendation files, run:
+
+`python evaluate.py`
+
+All ML4 evaluation validation checks passed.
