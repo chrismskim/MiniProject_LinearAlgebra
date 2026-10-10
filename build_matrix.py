@@ -4,8 +4,29 @@ import numpy as np
 import scipy.sparse as sp
 from pathlib import Path
 import pickle
+import subprocess
+import sys
 
 # DE4: Build Sparse Customer-Product Matrix
+# ==========================================
+# DE6: Reproducible Data Pipeline
+# ==========================================
+
+print("Step 1: Running data cleaning...", flush=True)
+
+subprocess.run(
+    [sys.executable, "data_cleaning.py"],
+    check=True
+)
+
+print("\nStep 2: Running train/test split...", flush=True)
+
+subprocess.run(
+    [sys.executable, "data_split.py"],
+    check=True
+)
+
+print("\nStep 3: Building sparse matrix...", flush=True)
 
 # 1. Load training data only
 train = pd.read_pickle("data/processed/train.pkl")
