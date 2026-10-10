@@ -358,4 +358,16 @@ python build_matrix.py
 ### Execution Results
 
 | Metric | Value |
-|
+
+
+## ML1: Dimensionality Reduction Method Selection
+
+Truncated SVD was selected as the primary dimensionality reduction method for the customer-product matrix.
+
+The matrix contains 5,475 customers and 3,689 products, with a sparsity of 97.95%.
+
+Unlike conventional mean-centered PCA, Truncated SVD can operate directly on sparse matrices without requiring dense storage.
+
+The model will be evaluated using held-out purchases and compared against a top-10 popularity baseline.
+
+See `Model_decisions.md` for the mathematical explanation and selection rationale.
