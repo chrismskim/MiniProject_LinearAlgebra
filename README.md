@@ -371,3 +371,47 @@ Unlike conventional mean-centered PCA, Truncated SVD can operate directly on spa
 The model will be evaluated using held-out purchases and compared against a top-10 popularity baseline.
 
 See `Model_decisions.md` for the mathematical explanation and selection rationale.
+
+## ML2: Truncated SVD Experiments
+
+Truncated SVD was applied to the training-only sparse customer-product matrix to evaluate dimensionality reduction using different numbers of components.
+
+### Experimental Setup
+
+- **Input Matrix:** 5,475 customers × 3,689 products
+- **Method:** Truncated SVD
+- **Components Tested:** k = 10, 20, 50, 100
+- **Algorithm:** Randomized SVD
+- **Iterations:** 7
+- **Random State:** 42
+- **Training Data:** Training-only customer-product matrix
+
+### Results
+
+| k | Reduced Matrix Shape | Explained Variance |
+|---|---|---:|
+| 10 | 5,475 × 10 | 19.83% |
+| 20 | 5,475 × 20 | 25.25% |
+| 50 | 5,475 × 50 | 34.88% |
+| 100 | 5,475 × 100 | 44.72% |
+
+### Findings
+
+- Explained variance increased as the number of components increased.
+- The highest explained variance in this experiment was 44.72% at k = 100.
+- Higher explained variance does not necessarily indicate better recommendation quality.
+- The final number of components will be determined by evaluating recommendation performance against held-out purchases.
+
+### Implementation
+
+- **Training Script:** `train_svd.py`
+- **Results:** `reports/svd_results.csv`
+- **Saved Models:** `data/processed/svd_models/` (local only)
+
+### Reproduction
+
+Run the following command after building the training matrix:
+
+`python train_svd.py`
+
+All ML2 model validation checks passed.
