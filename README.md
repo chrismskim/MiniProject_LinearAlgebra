@@ -590,3 +590,51 @@ Run:
 `python customer_segments.py`
 
 All ML6 validation checks passed.
+
+
+## ML7: Purchase Value Sensitivity Analysis
+
+A sensitivity analysis was conducted to evaluate whether different purchase-value representations affect recommendation performance.
+
+Three representations were compared using the same training data, customer-product mappings, Truncated SVD configuration (k=50), and held-out evaluation customers.
+
+### Purchase Value Representations
+
+- **Count:** Total purchased quantity for each customer-product pair.
+- **Binary:** 1 if a customer purchased a product, otherwise 0.
+- **Log:** log(1 + total purchased quantity).
+
+### Results
+
+| Purchase Value | Hit Rate@10 | Precision@10 | Recall@10 | Explained Variance |
+|---|---:|---:|---:|---:|
+| Count | 21.12% | 2.68% | 1.69% | 96.37% |
+| Binary | **40.15%** | **6.75%** | **4.66%** | 27.36% |
+| Log | 37.32% | 6.13% | 4.32% | 34.88% |
+
+### Findings
+
+- Binary purchase values achieved the highest Hit Rate@10, Precision@10, and Recall@10 among the three representations.
+- Count-based values achieved the highest explained variance but the lowest recommendation accuracy.
+- Purchase-value representation substantially affected recommendation performance.
+- The results suggest that purchase incidence may be more informative than purchased quantity for this new-product recommendation task.
+- These findings are based on a single held-out evaluation period and should be validated further before deployment.
+
+### Conclusion
+
+Binary purchase values are the strongest candidate among the tested representations at k=50.
+
+The earlier Log-based SVD k=50 model remains the selected configuration from ML5, while ML7 demonstrates that changing the purchase-value representation can improve its recommendation performance.
+
+### Implementation
+
+- **Script:** `sensitivity_analysis.py`
+- **Results:** `reports/sensitivity_results.csv`
+
+### Reproduction
+
+Run:
+
+`python sensitivity_analysis.py`
+
+All ML7 validation checks passed.
