@@ -415,3 +415,52 @@ Run the following command after building the training matrix:
 `python train_svd.py`
 
 All ML2 model validation checks passed.
+
+## ML3: Product Recommendation System
+
+A Top-10 product recommendation system was implemented using Truncated SVD and a popularity-based baseline.
+
+### Recommendation Methods
+
+**1. Truncated SVD Recommendations**
+
+Customer embeddings and SVD product components are used to estimate preference scores for each product.
+
+The predicted preference scores are calculated as:
+
+A_hat = (A × V_k) × V_kᵀ
+
+Products purchased during the training period are excluded before selecting the Top-10 recommendations.
+
+**2. Popularity-Based Baseline**
+
+A baseline recommender ranks products by total purchased quantity in the training data.
+
+The Top-10 most popular products not previously purchased by each customer are recommended.
+
+### Models
+
+| Model | Recommendation Shape | Validation |
+|---|---|---|
+| Popularity Baseline | 5,475 × 10 | Passed |
+| SVD (k=10) | 5,475 × 10 | Passed |
+| SVD (k=20) | 5,475 × 10 | Passed |
+| SVD (k=50) | 5,475 × 10 | Passed |
+| SVD (k=100) | 5,475 × 10 | Passed |
+
+### Validation
+
+- Each customer receives 10 recommendations.
+- Recommended products contain no duplicates.
+- Products previously purchased during training are excluded.
+- Product indices remain within the valid matrix dimensions.
+- Recommendations are generated using training data only.
+
+### Implementation
+
+- **Script:** `recommend.py`
+- **Input:** `data/processed/customer_product_matrix.npz`
+- **Models:** `data/processed/svd_models/`
+- **Outputs:** `data/processed/recommendations/`
+
+###
