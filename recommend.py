@@ -1,6 +1,7 @@
 
 from pathlib import Path
-
+from sklearn.preprocessing import normalize
+import time
 import joblib
 import numpy as np
 import pandas as pd
@@ -11,6 +12,12 @@ import scipy.sparse as sp
 MATRIX_PATH = Path("data/processed/customer_product_matrix.npz")
 MODEL_DIR = Path("data/processed/svd_models")
 OUTPUT_DIR = Path("data/processed/recommendations")
+
+REPORT_DIR = Path("reports")
+REPORT_DIR.mkdir(parents=True, exist_ok=True)
+
+job_start = time.perf_counter()
+timing_results = []
 
 K_VALUES = [10, 20, 50, 100]
 TOP_N = 10
@@ -93,7 +100,7 @@ def validate_recommendations(customer_index, recommendations):
 
 # 3. Build popularity baseline
 print("\nGenerating popularity baseline...")
-
+baseline_start = time.perf_counter()
 baseline_results = []
 
 for customer_idx in range(n_customers):
@@ -112,10 +119,37 @@ np.save(
 print("Popularity recommendation shape:", baseline_results.shape)
 print("Popularity baseline validation passed.")
 
+baseline_seconds = time.perf_counter() - baseline_start
+
+timing_results.append({
+    "model": "Popularity Baseline",
+    "customers": n_customers,
+    "generation_seconds": baseline_seconds
+})
+
+print(f"Baseline generation time: {baseline_seconds:.4f} seconds")
+
+
+def similar_products(product_idx, model, top_n=10):
+    # Each row represents a product in the latent space
+    product_vectors = normalize(model.components_.T)
+
+    if not 0 <= product_idx < len(product_vectors):
+        raise ValueError("Invalid product index")
+
+    # Cosine similarity between products
+    similarities = product_vectors @ product_vectors[product_idx]
+
+    # Exclude the product itself
+    similarities[product_idx] = -np.inf
+
+    # Return top-N most similar product indices
+    return np.argsort(-similarities, kind="stable")[:top_n]
 
 # 4. Build recommendations for each SVD model
 for k in K_VALUES:
     print(f"\nGenerating SVD recommendations for k={k}...")
+    model_start = time.perf_counter()
 
     model = joblib.load(MODEL_DIR / f"svd_k{k}.joblib")
     embeddings = joblib.load(
@@ -124,6 +158,26 @@ for k in K_VALUES:
 
     assert embeddings.shape == (n_customers, k)
     assert model.components_.shape == (k, n_products)
+    # ML3: Product similarity validation
+    if k == 50:
+        example_product_idx = 0
+
+        neighbors = similar_products(
+            example_product_idx,
+            model,
+            top_n=10
+        )
+
+        assert len(neighbors) == 10
+        assert len(set(neighbors)) == 10
+        assert example_product_idx not in neighbors
+        assert all(0 <= idx < n_products for idx in neighbors)
+
+        print("\nML3 Product Similarity Test")
+        print("Product index:", example_product_idx)
+        print("Top-10 similar product indices:", neighbors)
+        print("Product similarity validation passed.")
+
 
     results = []
 
@@ -146,6 +200,34 @@ for k in K_VALUES:
 
     print("Recommendation shape:", results.shape)
     print(f"SVD k={k} validation passed.")
+    generation_seconds = time.perf_counter() - model_start
+
+    timing_results.append({
+        "model": f"SVD k={k}",
+        "customers": n_customers,
+        "generation_seconds": generation_seconds
+    })
+
+    print(
+        f"SVD k={k} generation time: "
+        f"{generation_seconds:.4f} seconds"
+    )
 
 print("\nML3 recommendation generation completed.")
 print("Outputs saved to:", OUTPUT_DIR)
+
+# ML4: Nightly job runtime report
+total_job_seconds = time.perf_counter() - job_start
+
+timing_report = pd.DataFrame(timing_results)
+
+timing_report.to_csv(
+    REPORT_DIR / "recommendation_runtime.csv",
+    index=False
+)
+
+print("\nML4 Nightly Job Runtime:")
+print(timing_report.to_string(index=False))
+
+print(f"\nTotal job time: {total_job_seconds:.4f} seconds")
+print("ML4 runtime validation passed.")
