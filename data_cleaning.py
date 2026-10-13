@@ -1,7 +1,10 @@
+
 import pandas as pd
 from pathlib import Path
 
-# Load both sheets
+# DE2: Data Cleaning
+
+# 1. Load both Excel sheets
 sheets = pd.read_excel(
     "data/raw/online_retail_II.xlsx",
     sheet_name=None
@@ -9,136 +12,72 @@ sheets = pd.read_excel(
 
 df = pd.concat(sheets.values(), ignore_index=True)
 
-# Original row count
-print("Original rows:", len(df))
-
-# Remove cancelled invoices
-cancelled = df["Invoice"].astype(str).str.startswith("C")
-
-removed = cancelled.sum()
-
-df = df[~cancelled].copy()
-
-print("Cancelled invoice rows removed:", removed)
-print("Remaining rows:", len(df))
+original_rows = len(df)  #Use for removed rows later
 
 
-# Remove non-positive quantities
-invalid_quantity = df["Quantity"] <= 0
-
-removed_quantity = invalid_quantity.sum()
-
-df = df[~invalid_quantity].copy()
-
-print("Non-positive quantity rows removed:", removed_quantity)
-print("Remaining rows:", len(df))
-
-
-# Remove non-positive prices
-invalid_price = df["Price"] <= 0
-
-removed_price = invalid_price.sum()
-
-df = df[~invalid_price].copy()
-
-print("Non-positive price rows removed:", removed_price)
-print("Remaining rows:", len(df))
-
-# Remove non-product stock codes
+# 2. Define non-product codes
 non_product_codes = [
-    "POST",
-    "M",
-    "D",
-    "BANK CHARGES",
-    "AMAZONFEE",
-    "ADJUST",
-    "ADJUST2",
-    "TEST001",
-    "TEST002"
+    "POST", "M", "D", "BANK CHARGES",    #Delete the non sale code
+    "AMAZONFEE", "ADJUST", "ADJUST2",
+    "TEST001", "TEST002"
 ]
 
-stock_codes = df["StockCode"].astype(str).str.strip().str.upper()
+# 3. Clean transactions and record removed rows
+cleaning_results = []
 
-invalid_codes = stock_codes.isin(non_product_codes)
+def remove_rows(rule_name, invalid_mask):    #Delete which one, condition for deleting 
+    global df #Allow reassignment of the global df
 
-removed_codes = invalid_codes.sum()
+    removed = int(invalid_mask.sum())   #count the number of deleting row
+    df = df.loc[~invalid_mask].copy()   # Keep only valid rows
 
-df = df[~invalid_codes].copy()
+    #Save Cleaning Log
+    cleaning_results.append({
+        "Cleaning Rule": rule_name,
+        "Rows Removed": removed
+    })
 
-print("Non-product rows removed:", removed_codes)
-print("Remaining rows:", len(df))
-
-# Remove rows with missing Customer IDs
-missing_customer = df["Customer ID"].isna()
-
-removed_customer = missing_customer.sum()
-
-df = df[~missing_customer].copy()
-
-print("Missing Customer ID rows removed:", removed_customer)
-print("Remaining rows:", len(df))
+    print(f"{rule_name}: removed {removed} rows")
 
 
-# Create cleaning log
-cleaning_log = pd.DataFrame({
-    "Cleaning Rule": [
-        "Cancelled Invoices",
-        "Non-positive Quantity",
-        "Non-positive Price",
-        "Non-product Stock Codes",
-        "Missing Customer ID"
-    ],
-    "Rows Removed": [
-        removed,
-        removed_quantity,
-        removed_price,
-        removed_codes,
-        removed_customer
-    ]
-})
+#Data cleaning
+remove_rows(
+    "Cancelled Invoices",
+    df["Invoice"].astype(str).str.startswith("C")
+)
 
-print("\nCleaning Log:")
-print(cleaning_log)
+remove_rows(
+    "Non-positive Quantity",
+    df["Quantity"] <= 0
+)
 
-print("\nTotal rows removed:", cleaning_log["Rows Removed"].sum())
-print("Final rows:", len(df))
+remove_rows(
+    "Non-positive Price",
+    df["Price"] <= 0
+)
 
+remove_rows(
+    "Non-product Stock Codes",
+    df["StockCode"].astype(str).str.strip().str.upper()
+    .isin(non_product_codes)
+)
 
-# Validate cleaned data
-print("\nData Validation:")
+remove_rows(
+    "Missing Customer ID",
+    df["Customer ID"].isna()
+)
 
-print("Cancelled invoices:",
-      df["Invoice"].astype(str).str.startswith("C").sum())
+# 4. Create cleaning log
+cleaning_log = pd.DataFrame(cleaning_results)
 
-print("Non-positive quantities:",
-      (df["Quantity"] <= 0).sum())
-
-print("Non-positive prices:",
-      (df["Price"] <= 0).sum())
-
-print("Non-product codes:",
-      df["StockCode"].astype(str).str.strip().str.upper()
-      .isin(non_product_codes).sum())
-
-print("Missing Customer IDs:",
-      df["Customer ID"].isna().sum())
-
-# Check remaining missing descriptions
-print("\nRemaining missing descriptions:")
-print(df["Description"].isna().sum())
-
-
-# Create output directory
+# 5. Save cleaned data
 output_dir = Path("data/processed")
 output_dir.mkdir(parents=True, exist_ok=True)
 
-# Save cleaned dataset
-df.to_pickle(output_dir / "cleaned_retail.pkl")
+df.to_pickle(output_dir / "cleaned_retail.pkl")   #Pickle is usefull to get datas from Dataframe
 
-# Save cleaning log
 cleaning_log.to_csv(
     output_dir / "cleaning_log.csv",
     index=False
 )
 
-print("\nCleaned dataset and cleaning log saved.")

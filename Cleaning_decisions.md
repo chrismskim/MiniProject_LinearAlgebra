@@ -16,11 +16,11 @@
 | Non-product Stock Codes | 2,860 | Exclude selected shipping, fee, adjustment, discount, and test codes that do not represent recommendable products. |
 | Missing Customer ID | 235,890 | Customer identifiers are required to construct the customer-product matrix. |
 
-## Validation
+## Cleaning Process
 
-All five cleaning rules were checked after processing. No remaining rows violated these rules.
+Five cleaning rules were applied sequentially. The number of rows removed by each rule was recorded in the cleaning log.
 
-The cleaned dataset also contains no missing product descriptions.
+The final dataset contains 802,920 transaction rows.
 
 ## Output
 
